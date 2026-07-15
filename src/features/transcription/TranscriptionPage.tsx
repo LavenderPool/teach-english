@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Loader2, Volume2 } from 'lucide-react'
 import { AiBanner } from '@/components/AiBanner'
 import { Badge } from '@/components/ui/badge'
@@ -10,9 +10,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/stores/toast-store'
 import { IPA_KEYBOARD, IPA_SYMBOLS, type IpaKind } from '@/data/ipa'
 import { DeepSeekError, deepseekJson } from '@/lib/deepseek'
+import { PrefetchSlot } from '@/lib/prefetch'
 import { speak } from '@/lib/tts'
 import { ipaMatch } from '@/lib/utils'
 import { useAppStore } from '@/stores/app-store'
+
+type TranscriptionItem = {
+  word: string
+  ipa: string
+  example_sentence: string
+  distractors?: string[]
+}
 
 export function TranscriptionPage() {
   return (
@@ -127,14 +135,26 @@ function IpaPractice() {
 
   const [mode, setMode] = useState<'input' | 'cards'>('input')
   const [loading, setLoading] = useState(false)
-  const [item, setItem] = useState<{
-    word: string
-    ipa: string
-    example_sentence: string
-    distractors?: string[]
-  } | null>(null)
+  const [item, setItem] = useState<TranscriptionItem | null>(null)
   const [value, setValue] = useState('')
   const [done, setDone] = useState<{ correct: boolean } | null>(null)
+  const prefetch = useRef(new PrefetchSlot<TranscriptionItem>()).current
+
+  const fetchItem = async () =>
+    deepseekJson<TranscriptionItem>({
+      apiKey,
+      temperature: 0.85,
+      messages: [
+        {
+          role: 'system',
+          content:
+            mode === 'cards'
+              ? 'Сгенерируй английское слово B1-B2 и IPA. Верни JSON: {"word":"","ipa":"...","example_sentence":"","distractors":["похожая1","похожая2","похожая3"]} — distractors без слэшей, похожие на верную транскрипцию.'
+              : 'Сгенерируй одно английское слово среднего уровня (B1-B2). Верни JSON: { "word": "...", "ipa": "...", "example_sentence": "..." }. ipa без внешних слэшей.',
+        },
+        { role: 'user', content: 'Сгенерируй задание на транскрипцию.' },
+      ],
+    })
 
   const generate = async () => {
     if (!apiKey.trim()) {
@@ -145,25 +165,7 @@ function IpaPractice() {
     setDone(null)
     setValue('')
     try {
-      const data = await deepseekJson<{
-        word: string
-        ipa: string
-        example_sentence: string
-        distractors?: string[]
-      }>({
-        apiKey,
-        temperature: 0.85,
-        messages: [
-          {
-            role: 'system',
-            content:
-              mode === 'cards'
-                ? 'Сгенерируй английское слово B1-B2 и IPA. Верни JSON: {"word":"","ipa":"...","example_sentence":"","distractors":["похожая1","похожая2","похожая3"]} — distractors без слэшей, похожие на верную транскрипцию.'
-                : 'Сгенерируй одно английское слово среднего уровня (B1-B2). Верни JSON: { "word": "...", "ipa": "...", "example_sentence": "..." }. ipa без внешних слэшей.',
-          },
-          { role: 'user', content: 'Сгенерируй задание на транскрипцию.' },
-        ],
-      })
+      const data = await prefetch.take(fetchItem)
       setItem(data)
       speak(data.word, { voiceURI: voice, rate })
     } catch (e) {
@@ -193,6 +195,8 @@ function IpaPractice() {
         category: 'Pronunciation',
       })
     }
+    // Start next exercise immediately in the background
+    if (apiKey.trim()) prefetch.start(fetchItem)
   }
 
   const options = useMemo(() => {
@@ -204,10 +208,24 @@ function IpaPractice() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant={mode === 'input' ? 'default' : 'secondary'} onClick={() => setMode('input')}>
+        <Button
+          size="sm"
+          variant={mode === 'input' ? 'default' : 'secondary'}
+          onClick={() => {
+            setMode('input')
+            prefetch.clear()
+          }}
+        >
           Инпут-режим
         </Button>
-        <Button size="sm" variant={mode === 'cards' ? 'default' : 'secondary'} onClick={() => setMode('cards')}>
+        <Button
+          size="sm"
+          variant={mode === 'cards' ? 'default' : 'secondary'}
+          onClick={() => {
+            setMode('cards')
+            prefetch.clear()
+          }}
+        >
           Карточный режим
         </Button>
         <Button onClick={() => void generate()} disabled={loading || !apiKey}>

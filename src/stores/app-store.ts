@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { TENSES } from '@/data/tenses'
-import { SEED_WORDS } from '@/data/seed-words'
+import { loadMetaphors } from '@/data/metaphors'
+import { loadSeedWords } from '@/data/seed-words'
 import { applyReview, createCard, dueCards } from '@/lib/srs'
 import { exportDatabase, importDatabase, loadDatabase, resetSection, saveDatabase } from '@/lib/storage'
 import type {
@@ -66,7 +67,8 @@ interface AppState extends AppDatabase {
   updateCard: (id: string, patch: Partial<Card>) => void
   removeCard: (id: string) => void
   reviewCard: (id: string, quality: ReviewQuality) => void
-  importSeedDictionary: () => number
+  importSeedDictionary: () => Promise<number>
+  importMetaphorsLibrary: () => Promise<number>
   dueToday: () => Card[]
 
   // Tenses
@@ -161,19 +163,39 @@ export const useAppStore = create<AppState>((set, get) => ({
     )
   },
 
-  importSeedDictionary: () => {
+  importSeedDictionary: async () => {
+    const seedWords = await loadSeedWords()
     const existing = new Set(get().cards.map((c) => c.word.toLowerCase()))
-    const fresh = SEED_WORDS.filter((w) => !existing.has(w.word.toLowerCase())).map((w) =>
-      createCard({
-        word: w.word,
-        translation: w.translation,
-        transcription: w.transcription,
-        category: w.category,
-        exampleEn: w.exampleEn,
-        exampleRu: w.exampleRu,
-        source: 'imported',
-      }),
-    )
+    const fresh = seedWords
+      .filter((w) => !existing.has(w.word.toLowerCase()))
+      .map((w) =>
+        createCard({
+          word: w.word,
+          translation: w.translation,
+          transcription: w.transcription,
+          category: w.category,
+          exampleEn: w.exampleEn,
+          exampleRu: w.exampleRu,
+          source: 'imported',
+        }),
+      )
+    set((s) => persist({ ...s, cards: [...fresh, ...s.cards] }))
+    return fresh.length
+  },
+
+  importMetaphorsLibrary: async () => {
+    const metaphors = await loadMetaphors()
+    const existing = new Set(get().cards.map((c) => c.word.toLowerCase()))
+    const fresh = metaphors
+      .filter((m) => !existing.has(m.phrase.toLowerCase()))
+      .map((m) =>
+        createCard({
+          word: m.phrase,
+          translation: m.translation,
+          category: m.category || 'Idioms & metaphors',
+          source: 'imported',
+        }),
+      )
     set((s) => persist({ ...s, cards: [...fresh, ...s.cards] }))
     return fresh.length
   },

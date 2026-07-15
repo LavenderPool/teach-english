@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -19,9 +19,15 @@ import { Label } from '@/components/ui/badge'
 import { toast } from '@/stores/toast-store'
 import { TENSES } from '@/data/tenses'
 import { DeepSeekError, deepseekJson } from '@/lib/deepseek'
+import { PrefetchSlot } from '@/lib/prefetch'
 import type { CefrLevel, TextLength, TranslationDirection } from '@/lib/types'
 import { formatDate, formatPercent } from '@/lib/utils'
 import { useAppStore } from '@/stores/app-store'
+
+type TranslationPrompt = {
+  source_text: string
+  ideal_translation: string
+}
 
 export function GenerationPage() {
   const apiKey = useAppStore((s) => s.settings.deepseekApiKey)
@@ -34,25 +40,53 @@ export function GenerationPage() {
   const [level, setLevel] = useState<CefrLevel>('B1')
   const [loading, setLoading] = useState(false)
   const [checking, setChecking] = useState(false)
-  const [exercise, setExercise] = useState<{
-    source_text: string
-    ideal_translation: string
-  } | null>(null)
+  const [exercise, setExercise] = useState<TranslationPrompt | null>(null)
   const [userTranslation, setUserTranslation] = useState('')
   const [result, setResult] = useState<{
     match_percentage: number
     feedback: string
     grammar_errors: string[]
   } | null>(null)
+  const prefetch = useRef(new PrefetchSlot<TranslationPrompt>()).current
 
   const toggleTense = (id: string) => {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     )
+    prefetch.clear()
   }
 
-  const selectAll = () => setSelected(TENSES.map((t) => t.id))
-  const clearAll = () => setSelected([])
+  const selectAll = () => {
+    setSelected(TENSES.map((t) => t.id))
+    prefetch.clear()
+  }
+  const clearAll = () => {
+    setSelected([])
+    prefetch.clear()
+  }
+
+  const fetchExercise = async () => {
+    const tenseNames = selected
+      .map((id) => TENSES.find((t) => t.id === id)?.nameEn)
+      .filter(Boolean)
+      .join(', ')
+    return deepseekJson<TranslationPrompt>({
+      apiKey,
+      temperature: 0.8,
+      messages: [
+        {
+          role: 'system',
+          content: `Ты генератор упражнений на перевод. Верни JSON:
+{"source_text":"...","ideal_translation":"..."}
+direction=${direction}: если ru_to_en — source на русском, ideal на английском; если en_to_ru — наоборот.
+Длина: ${length === 'sentence' ? 'одно предложение' : 'короткий абзац 3-5 предложений'}.
+Уровень словаря: ${level}.
+Используй времена: ${tenseNames}.`,
+        },
+        { role: 'user', content: 'Сгенерируй упражнение на перевод.' },
+      ],
+    })
+  }
 
   const generate = async () => {
     if (!apiKey.trim()) {
@@ -67,26 +101,7 @@ export function GenerationPage() {
     setResult(null)
     setUserTranslation('')
     try {
-      const tenseNames = selected
-        .map((id) => TENSES.find((t) => t.id === id)?.nameEn)
-        .filter(Boolean)
-        .join(', ')
-      const data = await deepseekJson<{ source_text: string; ideal_translation: string }>({
-        apiKey,
-        temperature: 0.8,
-        messages: [
-          {
-            role: 'system',
-            content: `Ты генератор упражнений на перевод. Верни JSON:
-{"source_text":"...","ideal_translation":"..."}
-direction=${direction}: если ru_to_en — source на русском, ideal на английском; если en_to_ru — наоборот.
-Длина: ${length === 'sentence' ? 'одно предложение' : 'короткий абзац 3-5 предложений'}.
-Уровень словаря: ${level}.
-Используй времена: ${tenseNames}.`,
-          },
-          { role: 'user', content: 'Сгенерируй упражнение на перевод.' },
-        ],
-      })
+      const data = await prefetch.take(fetchExercise)
       setExercise(data)
     } catch (e) {
       toast(e instanceof DeepSeekError ? e.message : 'Ошибка генерации', { kind: 'error' })
@@ -135,6 +150,8 @@ direction=${direction}: если ru_to_en — source на русском, ideal 
         aiFeedback: data.feedback,
         grammarErrors: data.grammar_errors ?? [],
       })
+      // Prefetch next exercise while the user reads feedback
+      if (apiKey.trim() && selected.length > 0) prefetch.start(fetchExercise)
     } catch (e) {
       toast(e instanceof DeepSeekError ? e.message : 'Ошибка проверки', { kind: 'error' })
     } finally {
@@ -220,28 +237,40 @@ direction=${direction}: если ru_to_en — source на русском, ideal 
             <Button
               size="sm"
               variant={direction === 'ru_to_en' ? 'default' : 'secondary'}
-              onClick={() => setDirection('ru_to_en')}
+              onClick={() => {
+                setDirection('ru_to_en')
+                prefetch.clear()
+              }}
             >
               RU → EN
             </Button>
             <Button
               size="sm"
               variant={direction === 'en_to_ru' ? 'default' : 'secondary'}
-              onClick={() => setDirection('en_to_ru')}
+              onClick={() => {
+                setDirection('en_to_ru')
+                prefetch.clear()
+              }}
             >
               EN → RU
             </Button>
             <Button
               size="sm"
               variant={length === 'sentence' ? 'default' : 'secondary'}
-              onClick={() => setLength('sentence')}
+              onClick={() => {
+                setLength('sentence')
+                prefetch.clear()
+              }}
             >
               Предложение
             </Button>
             <Button
               size="sm"
               variant={length === 'paragraph' ? 'default' : 'secondary'}
-              onClick={() => setLength('paragraph')}
+              onClick={() => {
+                setLength('paragraph')
+                prefetch.clear()
+              }}
             >
               Абзац
             </Button>
@@ -250,7 +279,10 @@ direction=${direction}: если ru_to_en — source на русском, ideal 
                 key={l}
                 size="sm"
                 variant={level === l ? 'default' : 'outline'}
-                onClick={() => setLevel(l)}
+                onClick={() => {
+                  setLevel(l)
+                  prefetch.clear()
+                }}
               >
                 {l}
               </Button>
@@ -259,7 +291,7 @@ direction=${direction}: если ru_to_en — source на русском, ideal 
 
           <Button onClick={() => void generate()} disabled={loading || !apiKey}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Сгенерировать текст
+            {exercise && result ? 'Следующее упражнение' : 'Сгенерировать текст'}
           </Button>
         </CardContent>
       </Card>
@@ -300,6 +332,10 @@ direction=${direction}: если ru_to_en — source на русском, ideal 
                     {exercise.ideal_translation}
                   </p>
                 </details>
+                <Button onClick={() => void generate()} disabled={loading || !apiKey}>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Дальше
+                </Button>
               </div>
             )}
           </CardContent>
