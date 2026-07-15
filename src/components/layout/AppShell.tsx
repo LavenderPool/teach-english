@@ -7,7 +7,7 @@ export function AppShell() {
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
       <Sidebar />
       <main className="relative flex min-w-0 flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-5xl px-6 py-8 md:px-10">
+        <div className="mx-auto w-full max-w-5xl px-6 pb-24 pt-8 md:px-10">
           <Outlet />
         </div>
       </main>

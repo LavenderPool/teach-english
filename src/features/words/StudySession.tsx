@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Volume2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { generateCardExample } from '@/lib/generate-example'
 import type { Card as VocabCard, ReviewQuality } from '@/lib/types'
 import { speak } from '@/lib/tts'
 import { useAppStore } from '@/stores/app-store'
@@ -11,12 +12,16 @@ import { useAppStore } from '@/stores/app-store'
 export function StudySession() {
   const dueToday = useAppStore((s) => s.dueToday)
   const reviewCard = useAppStore((s) => s.reviewCard)
+  const updateCard = useAppStore((s) => s.updateCard)
+  const apiKey = useAppStore((s) => s.settings.deepseekApiKey)
   const voice = useAppStore((s) => s.settings.ttsVoice)
   const rate = useAppStore((s) => s.settings.ttsRate)
 
   const [queue, setQueue] = useState<VocabCard[]>(() => dueToday())
   const [revealed, setRevealed] = useState(false)
   const [started, setStarted] = useState(false)
+  const [liveExample, setLiveExample] = useState<string | null>(null)
+  const exampleAbort = useRef<AbortController | null>(null)
 
   const current = queue[0]
 
@@ -24,12 +29,67 @@ export function StudySession() {
     setQueue(dueToday())
     setRevealed(false)
     setStarted(true)
+    setLiveExample(null)
   }
+
+  // After the learner finishes a card (rates it), kick off example generation
+  // for that card in the background if it had none — ready for next reviews.
+  const generateExampleInBackground = (card: VocabCard) => {
+    if (!apiKey.trim()) return
+    if (card.exampleEn?.trim()) return
+    const controller = new AbortController()
+    void generateCardExample({
+      apiKey,
+      word: card.word,
+      translation: card.translation,
+      signal: controller.signal,
+    })
+      .then(({ exampleEn, exampleRu }) => {
+        if (!exampleEn) return
+        updateCard(card.id, { exampleEn, exampleRu })
+      })
+      .catch(() => {
+        /* silent background failure */
+      })
+  }
+
+  // While the card is revealed, also prefetch an example for display if missing.
+  useEffect(() => {
+    exampleAbort.current?.abort()
+    setLiveExample(null)
+    if (!current || !revealed || current.exampleEn?.trim() || !apiKey.trim()) return
+
+    const cardId = current.id
+    const word = current.word
+    const translation = current.translation
+    const controller = new AbortController()
+    exampleAbort.current = controller
+    void generateCardExample({
+      apiKey,
+      word,
+      translation,
+      signal: controller.signal,
+    })
+      .then(({ exampleEn, exampleRu }) => {
+        if (controller.signal.aborted || !exampleEn) return
+        setLiveExample(exampleEn)
+        updateCard(cardId, { exampleEn, exampleRu })
+      })
+      .catch(() => {
+        /* ignore */
+      })
+
+    return () => controller.abort()
+  }, [current, revealed, apiKey, updateCard])
 
   const rateQuality = (q: ReviewQuality) => {
     if (!current) return
     reviewCard(current.id, q)
+    if (!current.exampleEn?.trim() && !liveExample) {
+      generateExampleInBackground(current)
+    }
     setRevealed(false)
+    setLiveExample(null)
     setQueue((prev) => prev.slice(1))
   }
 
@@ -76,6 +136,8 @@ export function StudySession() {
     )
   }
 
+  const exampleText = current.exampleEn?.trim() || liveExample
+
   return (
     <div className="mx-auto max-w-lg space-y-4">
       <div className="text-center text-sm text-muted-foreground">Осталось: {queue.length}</div>
@@ -96,9 +158,11 @@ export function StudySession() {
           {revealed ? (
             <div className="space-y-2">
               <div className="text-xl">{current.translation}</div>
-              {current.exampleEn && (
-                <p className="text-sm text-muted-foreground">{current.exampleEn}</p>
-              )}
+              {exampleText ? (
+                <p className="text-sm text-muted-foreground">{exampleText}</p>
+              ) : apiKey.trim() ? (
+                <p className="text-xs text-muted-foreground">Генерируем пример…</p>
+              ) : null}
             </div>
           ) : (
             <Button onClick={() => setRevealed(true)}>Показать перевод</Button>

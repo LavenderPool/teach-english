@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Loader2, Plus, Volume2 } from 'lucide-react'
 import { AiBanner } from '@/components/AiBanner'
@@ -10,15 +10,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/stores/toast-store'
 import { StudySession } from '@/features/words/StudySession'
 import { DeepSeekError, deepseekJson } from '@/lib/deepseek'
+import { PrefetchSlot } from '@/lib/prefetch'
 import type { CefrLevel } from '@/lib/types'
 import { speak } from '@/lib/tts'
 import { useAppStore } from '@/stores/app-store'
+
+type ArcadeWord = {
+  word: string
+  translation: string
+  transcription: string
+  example?: string
+}
 
 export function WordsPage() {
   const cards = useAppStore((s) => s.cards)
   const addCard = useAppStore((s) => s.addCard)
   const removeCard = useAppStore((s) => s.removeCard)
   const importSeedDictionary = useAppStore((s) => s.importSeedDictionary)
+  const importMetaphorsLibrary = useAppStore((s) => s.importMetaphorsLibrary)
   const apiKey = useAppStore((s) => s.settings.deepseekApiKey)
   const [word, setWord] = useState('')
   const [translation, setTranslation] = useState('')
@@ -109,13 +118,41 @@ export function WordsPage() {
             <Button
               variant="secondary"
               onClick={() => {
-                const n = importSeedDictionary()
-                toast(n ? `Импортировано ${n} слов` : 'Все слова уже в колоде', {
-                  kind: n ? 'success' : 'info',
-                })
+                void (async () => {
+                  toast('Загружаем словарь…', { kind: 'info' })
+                  try {
+                    const n = await importSeedDictionary()
+                    toast(n ? `Импортировано ${n} слов` : 'Все слова уже в колоде', {
+                      kind: n ? 'success' : 'info',
+                    })
+                  } catch {
+                    toast('Не удалось загрузить словарь', { kind: 'error' })
+                  }
+                })()
               }}
             >
-              Загрузить базовый словарь
+              Загрузить базовый словарь (~5500)
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                void (async () => {
+                  toast('Загружаем библиотеку метафор…', { kind: 'info' })
+                  try {
+                    const n = await importMetaphorsLibrary()
+                    toast(
+                      n
+                        ? `Импортировано ${n} метафор и словосочетаний`
+                        : 'Все метафоры уже в колоде',
+                      { kind: n ? 'success' : 'info' },
+                    )
+                  } catch {
+                    toast('Не удалось загрузить библиотеку метафор', { kind: 'error' })
+                  }
+                })()
+              }}
+            >
+              Библиотека метафор (500)
             </Button>
           </div>
           {categories.map((cat) => (
@@ -224,16 +261,31 @@ export function ArcadePage() {
   const rate = settings.ttsRate
 
   const [loading, setLoading] = useState(false)
-  const [word, setWord] = useState<{
-    word: string
-    translation: string
-    transcription: string
-    example?: string
-  } | null>(null)
+  const [word, setWord] = useState<ArcadeWord | null>(null)
   const [answer, setAnswer] = useState('')
   const [result, setResult] = useState<{ correct: boolean; feedback: string } | null>(null)
   const [streak, setStreak] = useState(0)
   const [checking, setChecking] = useState(false)
+  const prefetch = useRef(new PrefetchSlot<ArcadeWord>()).current
+
+  const fetchWord = async () => {
+    const data = await deepseekJson<ArcadeWord>({
+      apiKey,
+      temperature: 0.9,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'Сгенерируй одно английское слово для словарной аркады. Верни JSON: {"word":"","translation":"","transcription":"/.../","example":""}. Не повторяй слова из списка seen.',
+        },
+        {
+          role: 'user',
+          content: `Уровень: ${settings.arcadeLevel}. Тема: ${settings.arcadeTopic || 'общая'}. Уже показаны: ${seen.slice(-40).join(', ') || 'нет'}`,
+        },
+      ],
+    })
+    return data
+  }
 
   const nextWord = async () => {
     if (!apiKey.trim()) {
@@ -244,26 +296,7 @@ export function ArcadePage() {
     setResult(null)
     setAnswer('')
     try {
-      const data = await deepseekJson<{
-        word: string
-        translation: string
-        transcription: string
-        example?: string
-      }>({
-        apiKey,
-        temperature: 0.9,
-        messages: [
-          {
-            role: 'system',
-            content:
-              'Сгенерируй одно английское слово для словарной аркады. Верни JSON: {"word":"","translation":"","transcription":"/.../","example":""}. Не повторяй слова из списка seen.',
-          },
-          {
-            role: 'user',
-            content: `Уровень: ${settings.arcadeLevel}. Тема: ${settings.arcadeTopic || 'общая'}. Уже показаны: ${seen.slice(-40).join(', ') || 'нет'}`,
-          },
-        ],
-      })
+      const data = await prefetch.take(fetchWord)
       setWord(data)
       rememberArcadeWord(data.word)
       speak(data.word, { voiceURI: voice, rate })
@@ -296,6 +329,8 @@ export function ArcadePage() {
       setResult(res)
       if (res.correct) setStreak((s) => s + 1)
       else setStreak(0)
+      // Instantly start generating the next word in the background
+      prefetch.start(fetchWord)
     } catch (e) {
       toast(e instanceof DeepSeekError ? e.message : 'Ошибка проверки', { kind: 'error' })
     } finally {

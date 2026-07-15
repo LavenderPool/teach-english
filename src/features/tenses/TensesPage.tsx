@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Loader2, Send, Sparkles } from 'lucide-react'
 import { AiBanner } from '@/components/AiBanner'
@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/input'
 import { toast } from '@/stores/toast-store'
 import { TENSES, getTense, tenseBaseTheoryText } from '@/data/tenses'
 import { DeepSeekError, deepseekChat, deepseekJson } from '@/lib/deepseek'
+import { PrefetchSlot } from '@/lib/prefetch'
 import { useAppStore } from '@/stores/app-store'
 import { formatDate, formatPercent } from '@/lib/utils'
 
@@ -301,23 +302,16 @@ function TensePractice({
   const [answer, setAnswer] = useState('')
   const [feedback, setFeedback] = useState<string | null>(null)
   const [checking, setChecking] = useState(false)
+  const prefetch = useRef(new PrefetchSlot<GeneratedExercise>()).current
 
-  const generate = async () => {
-    if (!apiKey.trim()) {
-      toast('Проверьте API-ключ DeepSeek в настройках', { kind: 'error' })
-      return
-    }
-    setLoading(true)
-    setFeedback(null)
-    setAnswer('')
-    try {
-      const data = await deepseekJson<GeneratedExercise>({
-        apiKey,
-        temperature: 0.8,
-        messages: [
-          {
-            role: 'system',
-            content: `Ты генератор упражнений по английским временам. Верни только JSON.
+  const fetchExercise = async () =>
+    deepseekJson<GeneratedExercise>({
+      apiKey,
+      temperature: 0.8,
+      messages: [
+        {
+          role: 'system',
+          content: `Ты генератор упражнений по английским временам. Верни только JSON.
 Схема: {
   "kind": "${kind}",
   "prompt": "текст задания",
@@ -330,10 +324,21 @@ function TensePractice({
 Для input: предложение с пропуском и глаголом в скобках.
 Для identify: английское предложение → угадать время (options = 4 названия времён включая верное).
 Для transform: переписать предложение в ${tenseName}.`,
-          },
-          { role: 'user', content: `Сгенерируй одно упражнение типа ${kind}.` },
-        ],
-      })
+        },
+        { role: 'user', content: `Сгенерируй одно упражнение типа ${kind}.` },
+      ],
+    })
+
+  const generate = async () => {
+    if (!apiKey.trim()) {
+      toast('Проверьте API-ключ DeepSeek в настройках', { kind: 'error' })
+      return
+    }
+    setLoading(true)
+    setFeedback(null)
+    setAnswer('')
+    try {
+      const data = await prefetch.take(fetchExercise)
       setExercise(data)
     } catch (e) {
       toast(e instanceof DeepSeekError ? e.message : 'Ошибка генерации', { kind: 'error' })
@@ -373,6 +378,8 @@ function TensePractice({
         onResult(result.correct)
         setFeedback(result.feedback)
       }
+      // Prefetch next exercise as soon as the current one is answered
+      if (apiKey.trim()) prefetch.start(fetchExercise)
     } catch (e) {
       toast(e instanceof DeepSeekError ? e.message : 'Ошибка проверки', { kind: 'error' })
     } finally {
@@ -408,6 +415,7 @@ function TensePractice({
                 setKind(k.id)
                 setExercise(null)
                 setFeedback(null)
+                prefetch.clear()
               }}
             >
               {k.label}
@@ -417,7 +425,7 @@ function TensePractice({
 
         <Button onClick={() => void generate()} disabled={loading || !apiKey}>
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          Сгенерировать упражнение
+          {exercise && feedback ? 'Следующее упражнение' : 'Сгенерировать упражнение'}
         </Button>
 
         {exercise && (
