@@ -1,10 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Loader2, Send, Sparkles } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { AiBanner } from '@/components/AiBanner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Group } from '@/components/ui/group'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/input'
@@ -21,37 +23,38 @@ export function TensesListPage() {
   return (
     <div className="animate-fade-in space-y-6">
       <header>
-        <h1 className="page-title text-3xl font-semibold tracking-tight">Времена</h1>
-        <p className="mt-1 text-muted-foreground">
+        <h1 className="page-title text-[2.2rem] leading-none">Времена</h1>
+        <p className="mt-2 text-[14px] text-muted-foreground">
           Теория по 12 временам и практика с проверкой через DeepSeek.
         </p>
       </header>
       <AiBanner />
-      <div className="grid gap-3 sm:grid-cols-2">
+      <Group>
         {TENSES.map((t) => {
           const p = progressFor(t.id)
           return (
             <Link
               key={t.id}
               to={`/tenses/${t.id}`}
-              className="glass rounded-3xl p-5 transition-all hover:bg-white/55 dark:hover:bg-white/10"
+              className="group-row flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/70 sm:px-5"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="font-semibold">{t.nameEn}</div>
-                  <div className="text-sm text-muted-foreground">{t.nameRu}</div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[14px] font-medium">{t.nameEn}</span>
+                  {p.theoryRead && <Badge>Теория</Badge>}
                 </div>
-                {p.theoryRead && <Badge>Теория</Badge>}
+                <div className="text-[12px] text-muted-foreground">{t.nameRu}</div>
               </div>
-              <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-                <span>{p.attempts} попыток</span>
-                <span>{formatPercent(p.practiceScore)}</span>
+              <div className="w-24 shrink-0 text-right">
+                <div className="text-[11px] text-muted-foreground">{p.attempts} попыток</div>
+                <div className="text-[12px] font-semibold">{formatPercent(p.practiceScore)}</div>
+                <Progress value={p.practiceScore} className="mt-1 h-1" />
               </div>
-              <Progress value={p.practiceScore} className="mt-2" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/70" />
             </Link>
           )
         })}
-      </div>
+      </Group>
     </div>
   )
 }
@@ -122,7 +125,7 @@ ${tenseBaseTheoryText(tense)}
           </Link>
         </Button>
         <div>
-          <h1 className="page-title text-3xl font-semibold tracking-tight">{tense.nameEn}</h1>
+          <h1 className="page-title text-[2rem] leading-none">{tense.nameEn}</h1>
           <p className="text-muted-foreground">{tense.nameRu}</p>
         </div>
       </div>
@@ -217,8 +220,8 @@ ${tenseBaseTheoryText(tense)}
                     key={m.id}
                     className={`rounded-xl px-3 py-2 text-sm whitespace-pre-wrap ${
                       m.role === 'user'
-                        ? 'ml-8 bg-accent-soft text-foreground backdrop-blur-md'
-                        : 'glass mr-8'
+                        ? 'ml-8 bg-accent-soft text-foreground'
+                        : 'mr-8 bg-muted'
                     }`}
                   >
                     {m.content}
@@ -431,7 +434,7 @@ function TensePractice({
         </Button>
 
         {exercise && (
-          <div className="glass-soft space-y-4 rounded-3xl p-4">
+          <div className="space-y-4 rounded-2xl bg-muted/70 p-4">
             <p className="whitespace-pre-wrap text-sm font-medium">{exercise.prompt}</p>
 
             {exercise.options && (kind === 'cards' || kind === 'identify') ? (
@@ -466,7 +469,7 @@ function TensePractice({
             )}
 
             {feedback && (
-              <div className="glass rounded-2xl p-3 text-sm whitespace-pre-wrap">{feedback}</div>
+              <div className="rounded-xl bg-card p-3 text-[13px] whitespace-pre-wrap">{feedback}</div>
             )}
           </div>
         )}

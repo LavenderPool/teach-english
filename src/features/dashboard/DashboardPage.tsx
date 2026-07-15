@@ -1,17 +1,17 @@
 import { Link } from 'react-router-dom'
-import { AudioLines, Clock3, Flame, Layers3, PenLine } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
+import { ChevronRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Group, GroupBody, GroupHeader, GroupRow, GroupTitle } from '@/components/ui/group'
+import { Progress } from '@/components/ui/progress'
 import { TENSES } from '@/data/tenses'
 import { useAppStore } from '@/stores/app-store'
 import { formatPercent } from '@/lib/utils'
 
-function scoreColor(score: number) {
-  if (score >= 75) return 'bg-success'
-  if (score >= 40) return 'bg-warning'
-  return 'bg-danger'
+function scoreTone(score: number) {
+  if (score >= 75) return 'text-success'
+  if (score >= 40) return 'text-warning'
+  return 'text-danger'
 }
 
 export function DashboardPage() {
@@ -22,6 +22,7 @@ export function DashboardPage() {
   const translations = useAppStore((s) => s.translationExercises)
   const due = dueToday()
   const mastered = cards.filter((c) => c.mastered).length
+  const practicedTenses = progress.filter((p) => p.attempts > 0).length
   const avgTranslation =
     translations.length === 0
       ? null
@@ -29,48 +30,39 @@ export function DashboardPage() {
 
   return (
     <div className="animate-fade-in space-y-8">
-      <header>
-        <h1 className="page-title text-3xl font-semibold tracking-tight">Обзор</h1>
-        <p className="mt-1 text-muted-foreground">
-          Сводка прогресса и быстрый старт занятий на сегодня.
-        </p>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            Сегодня
+          </p>
+          <h1 className="page-title mt-1 text-[2.35rem] leading-none">Обзор</h1>
+        </div>
+        <Button asChild size="lg">
+          <Link to="/words">{due.length ? 'Учить слова' : 'Открыть слова'}</Link>
+        </Button>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat
-          icon={<Layers3 className="h-4 w-4" />}
-          label="К повторению"
-          value={String(due.length)}
-          hint={`${mastered} освоено из ${cards.length}`}
-        />
-        <Stat
-          icon={<Flame className="h-4 w-4" />}
-          label="Серия дней"
-          value={String(streak)}
-          hint="Занимайтесь каждый день"
-        />
-        <Stat
-          icon={<Clock3 className="h-4 w-4" />}
-          label="Времена"
-          value={`${progress.filter((p) => p.attempts > 0).length}/12`}
-          hint="Практиковано"
-        />
-        <Stat
-          icon={<PenLine className="h-4 w-4" />}
-          label="Перевод"
-          value={avgTranslation == null ? '—' : formatPercent(avgTranslation)}
-          hint={`${translations.length} упражнений`}
-        />
-      </div>
-
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Времена</h2>
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/tenses">Открыть</Link>
-          </Button>
+      <Group>
+        <div className="grid grid-cols-2 divide-x divide-border sm:grid-cols-4">
+          <Metric label="К повторению" value={String(due.length)} hint={`${mastered}/${cards.length}`} />
+          <Metric label="Серия" value={String(streak)} hint="дней" />
+          <Metric label="Времена" value={`${practicedTenses}/12`} hint="практика" />
+          <Metric
+            label="Перевод"
+            value={avgTranslation == null ? '—' : formatPercent(avgTranslation)}
+            hint={`${translations.length} упр.`}
+          />
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+      </Group>
+
+      <section>
+        <div className="mb-2 flex items-baseline justify-between px-1">
+          <h2 className="section-label !mb-0 !ml-0">Времена</h2>
+          <Link to="/tenses" className="text-[13px] font-semibold text-accent hover:opacity-80">
+            Все
+          </Link>
+        </div>
+        <Group>
           {TENSES.map((t) => {
             const p = progress.find((x) => x.tenseId === t.id)
             const score = p?.practiceScore ?? 0
@@ -78,104 +70,102 @@ export function DashboardPage() {
               <Link
                 key={t.id}
                 to={`/tenses/${t.id}`}
-                className="glass rounded-3xl p-3 transition-all hover:bg-white/55 dark:hover:bg-white/10"
+                className="group-row flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/70 sm:px-5"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-medium leading-snug">{t.nameEn}</span>
-                  <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${scoreColor(score)}`} />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[14px] font-medium">{t.nameEn}</div>
+                  <div className="truncate text-[12px] text-muted-foreground">{t.nameRu}</div>
                 </div>
-                <Progress value={score} className="mt-3 h-1.5" />
+                <div className="w-20 shrink-0">
+                  <div className={`mb-1 text-right text-[11px] font-semibold ${scoreTone(score)}`}>
+                    {formatPercent(score)}
+                  </div>
+                  <Progress value={score} className="h-1" />
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/70" />
               </Link>
             )
           })}
-        </div>
+        </Group>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Layers3 className="h-4 w-4 text-accent" /> Карточки на сегодня
-            </CardTitle>
-            <CardDescription>
-              {due.length === 0
-                ? 'На сегодня всё повторено — можно добавить новые слова.'
-                : `${due.length} карточек ждут повторения.`}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link to="/words">{due.length ? 'Учить сейчас' : 'К словам'}</Link>
-            </Button>
-          </CardContent>
-        </Card>
+      <section className="grid gap-5 md:grid-cols-2">
+        <div>
+          <h2 className="section-label">Занятие</h2>
+          <Group>
+            <GroupHeader>
+              <GroupTitle>Карточки на сегодня</GroupTitle>
+            </GroupHeader>
+            <GroupBody className="space-y-3">
+              <p className="text-[13px] text-muted-foreground">
+                {due.length === 0
+                  ? 'На сегодня всё повторено — можно добавить новые слова.'
+                  : `${due.length} карточек ждут повторения.`}
+              </p>
+              <Button asChild variant={due.length ? 'default' : 'secondary'}>
+                <Link to="/words">{due.length ? 'Учить сейчас' : 'К словам'}</Link>
+              </Button>
+            </GroupBody>
+          </Group>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <AudioLines className="h-4 w-4 text-accent" /> Быстрый старт
-            </CardTitle>
-            <CardDescription>Выберите раздел для занятия.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            <Button asChild variant="secondary" size="sm">
-              <Link to="/transcription">Транскрипция</Link>
-            </Button>
-            <Button asChild variant="secondary" size="sm">
-              <Link to="/tenses">Времена</Link>
-            </Button>
-            <Button asChild variant="secondary" size="sm">
-              <Link to="/words/arcade">Аркада</Link>
-            </Button>
-            <Button asChild variant="secondary" size="sm">
-              <Link to="/generation">Перевод</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <div>
+          <h2 className="section-label">Разделы</h2>
+          <Group>
+            {(
+              [
+                ['/transcription', 'Транскрипция', 'IPA и произношение'],
+                ['/tenses', 'Времена', 'Теория и практика'],
+                ['/words/arcade', 'Аркада', 'Быстрые слова'],
+                ['/generation', 'Перевод', 'Проверка сходимости'],
+              ] as const
+            ).map(([to, title, subtitle]) => (
+              <Link
+                key={to}
+                to={to}
+                className="group-row flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-muted/70 sm:px-5"
+              >
+                <div>
+                  <div className="text-[14px] font-medium">{title}</div>
+                  <div className="text-[12px] text-muted-foreground">{subtitle}</div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/70" />
+              </Link>
+            ))}
+          </Group>
+        </div>
       </section>
 
       {due.slice(0, 5).length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Очередь повторения</h2>
-          <div className="space-y-2">
+          <h2 className="section-label">Очередь</h2>
+          <Group>
             {due.slice(0, 5).map((c) => (
-              <div
-                key={c.id}
-                className="glass flex items-center justify-between rounded-3xl px-4 py-3"
-              >
+              <GroupRow key={c.id}>
                 <div>
-                  <div className="font-medium">{c.word}</div>
-                  <div className="text-xs text-muted-foreground">{c.transcription || '—'}</div>
+                  <div className="text-[14px] font-medium">{c.word}</div>
+                  <div className="font-mono text-[12px] text-muted-foreground">
+                    {c.transcription || '—'}
+                  </div>
                 </div>
                 <Badge>{c.category || 'General'}</Badge>
-              </div>
+              </GroupRow>
             ))}
-          </div>
+          </Group>
         </section>
       )}
     </div>
   )
 }
 
-function Stat({
-  icon,
-  label,
-  value,
-  hint,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-  hint: string
-}) {
+function Metric({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
-    <div className="glass rounded-3xl p-5">
-      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-        {icon}
+    <div className="px-4 py-4 sm:px-5">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
         {label}
       </div>
-      <div className="mt-2 text-3xl font-semibold tracking-tight">{value}</div>
-      <div className="mt-1 text-xs text-muted-foreground">{hint}</div>
+      <div className="font-display mt-1 text-[1.85rem] leading-none tracking-tight">{value}</div>
+      <div className="mt-1 text-[11px] text-muted-foreground">{hint}</div>
     </div>
   )
 }

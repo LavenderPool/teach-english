@@ -52,33 +52,33 @@ export function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 px-4 pt-[15vh] backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/25 px-4 pt-[12vh] backdrop-blur-[2px]"
       onClick={() => setOpen(false)}
     >
       <div
-        className="glass-strong w-full max-w-lg overflow-hidden rounded-[1.75rem] animate-fade-in"
+        className="glass-strong w-full max-w-lg overflow-hidden rounded-2xl animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-2 border-b border-border/60 px-4">
-          <Search className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-2 border-b border-border px-4">
+          <Search className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
           <input
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Поиск раздела, времени или слова…"
-            className="h-12 w-full bg-transparent text-sm outline-none"
+            className="h-12 w-full bg-transparent text-[14px] outline-none"
           />
-          <kbd className="rounded-full bg-white/40 px-2 py-0.5 text-[10px] text-muted-foreground dark:bg-white/10">
+          <kbd className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
             esc
           </kbd>
         </div>
-        <div className="max-h-72 overflow-y-auto p-2">
+        <div className="max-h-72 overflow-y-auto py-1">
           {items.map((item) => (
             <button
               key={item.to + item.label}
               type="button"
               className={cn(
-                'flex w-full rounded-2xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/45 dark:hover:bg-white/10',
+                'flex w-full px-4 py-2.5 text-left text-[14px] transition-colors hover:bg-muted',
               )}
               onClick={() => {
                 navigate(item.to)
@@ -90,7 +90,9 @@ export function CommandPalette() {
             </button>
           ))}
           {items.length === 0 && (
-            <div className="px-3 py-6 text-center text-sm text-muted-foreground">Ничего не найдено</div>
+            <div className="px-4 py-8 text-center text-[13px] text-muted-foreground">
+              Ничего не найдено
+            </div>
           )}
         </div>
       </div>

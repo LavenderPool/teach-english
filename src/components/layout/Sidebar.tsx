@@ -19,18 +19,17 @@ const NAV = [
 
 export function Sidebar() {
   return (
-    <aside className="m-3 mr-0 flex h-[calc(100%-1.5rem)] w-[232px] shrink-0 flex-col rounded-[1.75rem] glass-nav px-3 py-5">
-      <div className="mb-8 flex items-center gap-2.5 px-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent text-sm font-bold text-accent-foreground shadow-[0_10px_24px_-12px_rgba(0,122,255,0.8)]">
-          EL
+    <aside className="m-3 mr-0 flex h-[calc(100%-1.5rem)] w-[220px] shrink-0 flex-col rounded-2xl glass-nav px-2.5 py-4">
+      <div className="mb-6 px-2.5 pt-1">
+        <div className="font-display text-[1.35rem] font-semibold leading-none tracking-tight">
+          English
         </div>
-        <div>
-          <div className="text-sm font-semibold tracking-tight">English Learner</div>
-          <div className="text-[11px] text-muted-foreground">Liquid Glass · DeepSeek</div>
+        <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          Learner
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav className="flex flex-1 flex-col gap-0.5">
         {NAV.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
@@ -38,13 +37,26 @@ export function Sidebar() {
             end={end}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-white/35 hover:text-foreground dark:hover:bg-white/8',
-                isActive && 'nav-active-pill bg-sidebar-active text-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]',
+                'group relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground',
+                isActive && 'bg-muted text-foreground',
               )
             }
           >
-            <Icon className="h-4 w-4 shrink-0" />
-            {label}
+            {({ isActive }) => (
+              <>
+                <span
+                  className={cn(
+                    'absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-accent opacity-0 transition-opacity',
+                    isActive && 'opacity-100',
+                  )}
+                />
+                <Icon
+                  className={cn('h-[17px] w-[17px] shrink-0', isActive && 'text-accent')}
+                  strokeWidth={1.75}
+                />
+                {label}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
@@ -53,13 +65,26 @@ export function Sidebar() {
         to="/settings"
         className={({ isActive }) =>
           cn(
-            'mt-2 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-white/35 hover:text-foreground dark:hover:bg-white/8',
-            isActive && 'nav-active-pill bg-sidebar-active text-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]',
+            'relative mt-1 flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground',
+            isActive && 'bg-muted text-foreground',
           )
         }
       >
-        <Settings className="h-4 w-4" />
-        Настройки
+        {({ isActive }) => (
+          <>
+            <span
+              className={cn(
+                'absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-accent opacity-0 transition-opacity',
+                isActive && 'opacity-100',
+              )}
+            />
+            <Settings
+              className={cn('h-[17px] w-[17px]', isActive && 'text-accent')}
+              strokeWidth={1.75}
+            />
+            Настройки
+          </>
+        )}
       </NavLink>
     </aside>
   )

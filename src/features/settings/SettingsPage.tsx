@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, Eye, EyeOff, ExternalLink, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, ExternalLink, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -105,8 +105,8 @@ export function SettingsPage() {
   return (
     <div className="animate-fade-in space-y-6">
       <header>
-        <h1 className="page-title text-3xl font-semibold tracking-tight">Настройки</h1>
-        <p className="mt-1 text-muted-foreground">Тема, DeepSeek API, TTS и данные.</p>
+        <h1 className="page-title text-[2.2rem] leading-none">Настройки</h1>
+        <p className="mt-2 text-[14px] text-muted-foreground">Тема, DeepSeek API, TTS и данные.</p>
       </header>
 
       <Card>
@@ -135,10 +135,7 @@ export function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            Будильник слов (macOS)
-          </CardTitle>
+          <CardTitle>Будильник слов (macOS)</CardTitle>
           <CardDescription>
             Каждые X часов — уведомление со случайным коротким словом (до трёх в баннере). По нажатию
             открывается мини-окно с переводом. Чтобы снова включить будильник, пройдите N карточек.
@@ -265,7 +262,7 @@ export function SettingsPage() {
           <div className="space-y-1.5">
             <Label>Голос</Label>
             <select
-              className="flex h-10 w-full rounded-2xl border border-border/80 bg-white/40 px-3 text-sm backdrop-blur-xl dark:bg-white/8"
+              className="flex h-10 w-full rounded-xl border border-border bg-white/50 px-3 text-[14px] dark:bg-white/[0.06]"
               value={settings.ttsVoice}
               onChange={(e) => updateSettings({ ttsVoice: e.target.value })}
             >

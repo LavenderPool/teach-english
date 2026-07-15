@@ -4,6 +4,7 @@ import { Loader2, Plus, Volume2 } from 'lucide-react'
 import { AiBanner } from '@/components/AiBanner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Group } from '@/components/ui/group'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -90,8 +91,8 @@ export function WordsPage() {
     <div className="animate-fade-in space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="page-title text-3xl font-semibold tracking-tight">Слова</h1>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="page-title text-[2.2rem] leading-none">Слова</h1>
+          <p className="mt-2 text-[14px] text-muted-foreground">
             SRS-карточки (SM-2) и аркада с проверкой через ИИ.
           </p>
         </div>
@@ -157,23 +158,23 @@ export function WordsPage() {
           </div>
           {categories.map((cat) => (
             <div key={cat}>
-              <h3 className="mb-2 text-sm font-medium text-muted-foreground">{cat}</h3>
-              <div className="space-y-2">
+              <h3 className="section-label">{cat}</h3>
+              <Group>
                 {cards
                   .filter((c) => (c.category || 'General') === cat)
                   .map((c) => (
                     <div
                       key={c.id}
-                      className="glass flex items-center justify-between gap-3 rounded-3xl px-4 py-3"
+                      className="group-row flex items-center justify-between gap-3 px-4 py-3.5 sm:px-5"
                     >
                       <div>
-                        <div className="font-medium">
+                        <div className="text-[14px] font-medium">
                           {c.word}{' '}
-                          <span className="text-sm font-normal text-muted-foreground">
+                          <span className="text-[13px] font-normal text-muted-foreground">
                             — {c.translation}
                           </span>
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-[12px] text-muted-foreground">
                           {c.transcription || '—'} · интервал {c.intervalDays}д
                           {c.mastered ? ' · освоено' : ''}
                         </div>
@@ -183,7 +184,7 @@ export function WordsPage() {
                       </Button>
                     </div>
                   ))}
-              </div>
+              </Group>
             </div>
           ))}
           {cards.length === 0 && (
@@ -342,7 +343,7 @@ export function ArcadePage() {
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="page-title text-3xl font-semibold tracking-tight">Аркада</h1>
+          <h1 className="page-title text-[2.2rem] leading-none">Аркада</h1>
           <p className="mt-1 text-muted-foreground">Случайные слова · серия: {streak}</p>
         </div>
         <Button asChild variant="ghost">
@@ -357,7 +358,7 @@ export function ArcadePage() {
           <div className="space-y-1.5">
             <Label>Уровень</Label>
             <select
-              className="flex h-10 w-full rounded-2xl border border-border/80 bg-white/40 px-3 text-sm backdrop-blur-xl dark:bg-white/8"
+              className="flex h-10 w-full rounded-xl border border-border bg-white/50 px-3 text-[14px] dark:bg-white/[0.06]"
               value={settings.arcadeLevel}
               onChange={(e) => updateSettings({ arcadeLevel: e.target.value as CefrLevel })}
             >
