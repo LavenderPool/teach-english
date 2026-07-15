@@ -19,14 +19,14 @@ const NAV = [
 
 export function Sidebar() {
   return (
-    <aside className="flex h-full w-[232px] shrink-0 flex-col border-r border-border/60 bg-sidebar px-3 py-5">
+    <aside className="m-3 mr-0 flex h-[calc(100%-1.5rem)] w-[232px] shrink-0 flex-col rounded-[1.75rem] glass-nav px-3 py-5">
       <div className="mb-8 flex items-center gap-2.5 px-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent text-sm font-bold text-accent-foreground">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent text-sm font-bold text-accent-foreground shadow-[0_10px_24px_-12px_rgba(0,122,255,0.8)]">
           EL
         </div>
         <div>
           <div className="text-sm font-semibold tracking-tight">English Learner</div>
-          <div className="text-[11px] text-muted-foreground">macOS · DeepSeek</div>
+          <div className="text-[11px] text-muted-foreground">Liquid Glass · DeepSeek</div>
         </div>
       </div>
 
@@ -38,8 +38,8 @@ export function Sidebar() {
             end={end}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-muted/70 hover:text-foreground',
-                isActive && 'bg-sidebar-active text-accent',
+                'flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-white/35 hover:text-foreground dark:hover:bg-white/8',
+                isActive && 'nav-active-pill bg-sidebar-active text-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]',
               )
             }
           >
@@ -53,8 +53,8 @@ export function Sidebar() {
         to="/settings"
         className={({ isActive }) =>
           cn(
-            'mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-muted/70 hover:text-foreground',
-            isActive && 'bg-sidebar-active text-accent',
+            'mt-2 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-white/35 hover:text-foreground dark:hover:bg-white/8',
+            isActive && 'nav-active-pill bg-sidebar-active text-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]',
           )
         }
       >

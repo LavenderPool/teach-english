@@ -90,7 +90,7 @@ export function WordsPage() {
     <div className="animate-fade-in space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Слова</h1>
+          <h1 className="page-title text-3xl font-semibold tracking-tight">Слова</h1>
           <p className="mt-1 text-muted-foreground">
             SRS-карточки (SM-2) и аркада с проверкой через ИИ.
           </p>
@@ -164,7 +164,7 @@ export function WordsPage() {
                   .map((c) => (
                     <div
                       key={c.id}
-                      className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card px-4 py-3"
+                      className="glass flex items-center justify-between gap-3 rounded-3xl px-4 py-3"
                     >
                       <div>
                         <div className="font-medium">
@@ -342,7 +342,7 @@ export function ArcadePage() {
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Аркада</h1>
+          <h1 className="page-title text-3xl font-semibold tracking-tight">Аркада</h1>
           <p className="mt-1 text-muted-foreground">Случайные слова · серия: {streak}</p>
         </div>
         <Button asChild variant="ghost">
@@ -357,7 +357,7 @@ export function ArcadePage() {
           <div className="space-y-1.5">
             <Label>Уровень</Label>
             <select
-              className="flex h-10 w-full rounded-xl border border-border bg-card px-3 text-sm"
+              className="flex h-10 w-full rounded-2xl border border-border/80 bg-white/40 px-3 text-sm backdrop-blur-xl dark:bg-white/8"
               value={settings.arcadeLevel}
               onChange={(e) => updateSettings({ arcadeLevel: e.target.value as CefrLevel })}
             >

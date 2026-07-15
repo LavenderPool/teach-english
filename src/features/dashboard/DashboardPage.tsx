@@ -30,7 +30,7 @@ export function DashboardPage() {
   return (
     <div className="animate-fade-in space-y-8">
       <header>
-        <h1 className="text-3xl font-semibold tracking-tight">Обзор</h1>
+        <h1 className="page-title text-3xl font-semibold tracking-tight">Обзор</h1>
         <p className="mt-1 text-muted-foreground">
           Сводка прогресса и быстрый старт занятий на сегодня.
         </p>
@@ -78,7 +78,7 @@ export function DashboardPage() {
               <Link
                 key={t.id}
                 to={`/tenses/${t.id}`}
-                className="rounded-2xl border border-border/70 bg-card p-3 transition-colors hover:bg-muted/40"
+                className="glass rounded-3xl p-3 transition-all hover:bg-white/55 dark:hover:bg-white/10"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium leading-snug">{t.nameEn}</span>
@@ -141,7 +141,7 @@ export function DashboardPage() {
             {due.slice(0, 5).map((c) => (
               <div
                 key={c.id}
-                className="flex items-center justify-between rounded-2xl border border-border/60 bg-card px-4 py-3"
+                className="glass flex items-center justify-between rounded-3xl px-4 py-3"
               >
                 <div>
                   <div className="font-medium">{c.word}</div>
@@ -169,7 +169,7 @@ function Stat({
   hint: string
 }) {
   return (
-    <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
+    <div className="glass rounded-3xl p-5">
       <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
         {icon}
         {label}

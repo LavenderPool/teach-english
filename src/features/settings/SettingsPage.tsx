@@ -105,7 +105,7 @@ export function SettingsPage() {
   return (
     <div className="animate-fade-in space-y-6">
       <header>
-        <h1 className="text-3xl font-semibold tracking-tight">Настройки</h1>
+        <h1 className="page-title text-3xl font-semibold tracking-tight">Настройки</h1>
         <p className="mt-1 text-muted-foreground">Тема, DeepSeek API, TTS и данные.</p>
       </header>
 
@@ -265,7 +265,7 @@ export function SettingsPage() {
           <div className="space-y-1.5">
             <Label>Голос</Label>
             <select
-              className="flex h-10 w-full rounded-xl border border-border bg-card px-3 text-sm"
+              className="flex h-10 w-full rounded-2xl border border-border/80 bg-white/40 px-3 text-sm backdrop-blur-xl dark:bg-white/8"
               value={settings.ttsVoice}
               onChange={(e) => updateSettings({ ttsVoice: e.target.value })}
             >

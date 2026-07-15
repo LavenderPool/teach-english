@@ -192,7 +192,7 @@ direction=${direction}: если ru_to_en — source на русском, ideal 
   return (
     <div className="animate-fade-in space-y-6">
       <header>
-        <h1 className="text-3xl font-semibold tracking-tight">Генерация</h1>
+        <h1 className="page-title text-3xl font-semibold tracking-tight">Генерация</h1>
         <p className="mt-1 text-muted-foreground">
           Упражнения на перевод с оценкой сходства через DeepSeek.
         </p>
@@ -221,7 +221,7 @@ direction=${direction}: если ru_to_en — source на русском, ideal 
               {TENSES.map((t) => (
                 <label
                   key={t.id}
-                  className="flex cursor-pointer items-center gap-2 rounded-xl border border-border/60 bg-card px-3 py-2 text-sm"
+                  className="glass flex cursor-pointer items-center gap-2 rounded-2xl px-3 py-2 text-sm"
                 >
                   <Checkbox
                     checked={selected.includes(t.id)}
@@ -316,7 +316,7 @@ direction=${direction}: если ru_to_en — source на русском, ideal 
                 {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Проверить'}
               </Button>
             ) : (
-              <div className="space-y-3 rounded-2xl border border-border/60 bg-card p-4">
+              <div className="glass space-y-3 rounded-3xl p-4">
                 <div className="text-3xl font-semibold">{formatPercent(result.match_percentage)}</div>
                 <p className="text-sm whitespace-pre-wrap">{result.feedback}</p>
                 {result.grammar_errors?.length > 0 && (
@@ -372,7 +372,7 @@ direction=${direction}: если ru_to_en — source на русском, ideal 
             {byTense.map((t) => (
               <div
                 key={t.id}
-                className="flex items-center justify-between rounded-xl border border-border/50 px-3 py-2 text-sm"
+                className="glass-soft flex items-center justify-between rounded-2xl px-3 py-2 text-sm"
               >
                 <span>{t.name}</span>
                 <Badge>{formatPercent(t.avg)}</Badge>

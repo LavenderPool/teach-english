@@ -21,7 +21,7 @@ export function TensesListPage() {
   return (
     <div className="animate-fade-in space-y-6">
       <header>
-        <h1 className="text-3xl font-semibold tracking-tight">Времена</h1>
+        <h1 className="page-title text-3xl font-semibold tracking-tight">Времена</h1>
         <p className="mt-1 text-muted-foreground">
           Теория по 12 временам и практика с проверкой через DeepSeek.
         </p>
@@ -34,7 +34,7 @@ export function TensesListPage() {
             <Link
               key={t.id}
               to={`/tenses/${t.id}`}
-              className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm transition-colors hover:bg-muted/30"
+              className="glass rounded-3xl p-5 transition-all hover:bg-white/55 dark:hover:bg-white/10"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -122,7 +122,7 @@ ${tenseBaseTheoryText(tense)}
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">{tense.nameEn}</h1>
+          <h1 className="page-title text-3xl font-semibold tracking-tight">{tense.nameEn}</h1>
           <p className="text-muted-foreground">{tense.nameRu}</p>
         </div>
       </div>
@@ -216,7 +216,9 @@ ${tenseBaseTheoryText(tense)}
                   <div
                     key={m.id}
                     className={`rounded-xl px-3 py-2 text-sm whitespace-pre-wrap ${
-                      m.role === 'user' ? 'ml-8 bg-accent-soft text-foreground' : 'mr-8 bg-card'
+                      m.role === 'user'
+                        ? 'ml-8 bg-accent-soft text-foreground backdrop-blur-md'
+                        : 'glass mr-8'
                     }`}
                   >
                     {m.content}
@@ -429,7 +431,7 @@ function TensePractice({
         </Button>
 
         {exercise && (
-          <div className="space-y-4 rounded-2xl border border-border/60 bg-muted/30 p-4">
+          <div className="glass-soft space-y-4 rounded-3xl p-4">
             <p className="whitespace-pre-wrap text-sm font-medium">{exercise.prompt}</p>
 
             {exercise.options && (kind === 'cards' || kind === 'identify') ? (
@@ -464,7 +466,7 @@ function TensePractice({
             )}
 
             {feedback && (
-              <div className="rounded-xl bg-card p-3 text-sm whitespace-pre-wrap">{feedback}</div>
+              <div className="glass rounded-2xl p-3 text-sm whitespace-pre-wrap">{feedback}</div>
             )}
           </div>
         )}

@@ -52,14 +52,14 @@ export function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4 pt-[15vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 px-4 pt-[15vh] backdrop-blur-sm"
       onClick={() => setOpen(false)}
     >
       <div
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-2xl animate-fade-in"
+        className="glass-strong w-full max-w-lg overflow-hidden rounded-[1.75rem] animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-2 border-b border-border px-4">
+        <div className="flex items-center gap-2 border-b border-border/60 px-4">
           <Search className="h-4 w-4 text-muted-foreground" />
           <input
             autoFocus
@@ -68,7 +68,9 @@ export function CommandPalette() {
             placeholder="Поиск раздела, времени или слова…"
             className="h-12 w-full bg-transparent text-sm outline-none"
           />
-          <kbd className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">esc</kbd>
+          <kbd className="rounded-full bg-white/40 px-2 py-0.5 text-[10px] text-muted-foreground dark:bg-white/10">
+            esc
+          </kbd>
         </div>
         <div className="max-h-72 overflow-y-auto p-2">
           {items.map((item) => (
@@ -76,7 +78,7 @@ export function CommandPalette() {
               key={item.to + item.label}
               type="button"
               className={cn(
-                'flex w-full rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted',
+                'flex w-full rounded-2xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/45 dark:hover:bg-white/10',
               )}
               onClick={() => {
                 navigate(item.to)

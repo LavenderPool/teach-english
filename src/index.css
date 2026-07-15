@@ -3,41 +3,46 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+  --font-sans: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-mono: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
 
-  --color-background: #f5f5f7;
-  --color-foreground: #1d1d1f;
-  --color-card: #ffffff;
-  --color-card-foreground: #1d1d1f;
-  --color-muted: #e8e8ed;
-  --color-muted-foreground: #6e6e73;
-  --color-border: #d2d2d7;
-  --color-accent: #4f46e5;
+  --color-background: #eef2f7;
+  --color-foreground: #0b1220;
+  --color-card: rgba(255, 255, 255, 0.58);
+  --color-card-foreground: #0b1220;
+  --color-muted: rgba(255, 255, 255, 0.42);
+  --color-muted-foreground: #5b6578;
+  --color-border: rgba(255, 255, 255, 0.55);
+  --color-accent: #007aff;
   --color-accent-foreground: #ffffff;
-  --color-accent-soft: #eef2ff;
-  --color-success: #34c759;
+  --color-accent-soft: rgba(0, 122, 255, 0.12);
+  --color-success: #30d158;
   --color-warning: #ff9f0a;
-  --color-danger: #ff3b30;
-  --color-sidebar: #fafafa;
-  --color-sidebar-active: #eef2ff;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.25rem;
+  --color-danger: #ff453a;
+  --color-sidebar: rgba(255, 255, 255, 0.45);
+  --color-sidebar-active: rgba(0, 122, 255, 0.14);
+  --color-glass-highlight: rgba(255, 255, 255, 0.72);
+  --color-glass-shadow: rgba(15, 23, 42, 0.08);
+  --radius-xl: 1.15rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.85rem;
 }
 
 .dark {
-  --color-background: #000000;
-  --color-foreground: #f5f5f7;
-  --color-card: #1c1c1e;
-  --color-card-foreground: #f5f5f7;
-  --color-muted: #2c2c2e;
-  --color-muted-foreground: #98989d;
-  --color-border: #38383a;
-  --color-accent: #818cf8;
-  --color-accent-foreground: #0f0f12;
-  --color-accent-soft: #1e1b4b;
-  --color-sidebar: #0a0a0a;
-  --color-sidebar-active: #1e1b4b;
+  --color-background: #070a12;
+  --color-foreground: #f2f5fb;
+  --color-card: rgba(28, 32, 44, 0.55);
+  --color-card-foreground: #f2f5fb;
+  --color-muted: rgba(255, 255, 255, 0.08);
+  --color-muted-foreground: #9aa3b5;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-accent: #0a84ff;
+  --color-accent-foreground: #ffffff;
+  --color-accent-soft: rgba(10, 132, 255, 0.18);
+  --color-sidebar: rgba(18, 22, 34, 0.55);
+  --color-sidebar-active: rgba(10, 132, 255, 0.22);
+  --color-glass-highlight: rgba(255, 255, 255, 0.14);
+  --color-glass-shadow: rgba(0, 0, 0, 0.35);
 }
 
 * {
@@ -53,8 +58,22 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--color-background);
   color: var(--color-foreground);
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(1200px 700px at 8% -10%, rgba(0, 122, 255, 0.18), transparent 55%),
+    radial-gradient(900px 600px at 92% 8%, rgba(48, 209, 88, 0.12), transparent 50%),
+    radial-gradient(800px 500px at 70% 95%, rgba(90, 200, 250, 0.16), transparent 55%),
+    linear-gradient(165deg, #f5f7fb 0%, #e8eef8 45%, #eef6f2 100%);
+  background-attachment: fixed;
+}
+
+html.dark body {
+  background-image:
+    radial-gradient(1100px 680px at 10% -8%, rgba(10, 132, 255, 0.28), transparent 55%),
+    radial-gradient(900px 560px at 95% 5%, rgba(50, 215, 160, 0.12), transparent 50%),
+    radial-gradient(700px 480px at 60% 100%, rgba(64, 156, 255, 0.14), transparent 55%),
+    linear-gradient(165deg, #05070d 0%, #0a1020 50%, #071018 100%);
 }
 
 #root {
@@ -67,24 +86,109 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--color-muted-foreground) 35%, transparent);
+  background: color-mix(in srgb, var(--color-muted-foreground) 30%, transparent);
   border-radius: 999px;
 }
 
+/* Liquid Glass surfaces (iOS 26) */
+.glass {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  box-shadow:
+    0 1px 0 var(--color-glass-highlight) inset,
+    0 10px 30px -18px var(--color-glass-shadow),
+    0 2px 8px -6px var(--color-glass-shadow);
+  backdrop-filter: blur(28px) saturate(1.55);
+  -webkit-backdrop-filter: blur(28px) saturate(1.55);
+}
+
+.glass-strong {
+  background: color-mix(in srgb, var(--color-card) 85%, white 15%);
+  border: 1px solid var(--color-border);
+  box-shadow:
+    0 1px 0 var(--color-glass-highlight) inset,
+    0 18px 40px -22px var(--color-glass-shadow),
+    0 4px 14px -8px var(--color-glass-shadow);
+  backdrop-filter: blur(40px) saturate(1.7);
+  -webkit-backdrop-filter: blur(40px) saturate(1.7);
+}
+
+.dark .glass-strong {
+  background: color-mix(in srgb, var(--color-card) 90%, black 10%);
+}
+
+.glass-soft {
+  background: var(--color-muted);
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  box-shadow: 0 1px 0 var(--color-glass-highlight) inset;
+  backdrop-filter: blur(18px) saturate(1.35);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+}
+
+.glass-nav {
+  background: var(--color-sidebar);
+  border: 1px solid var(--color-border);
+  box-shadow:
+    0 1px 0 var(--color-glass-highlight) inset,
+    0 20px 50px -28px var(--color-glass-shadow);
+  backdrop-filter: blur(36px) saturate(1.65);
+  -webkit-backdrop-filter: blur(36px) saturate(1.65);
+}
+
+.page-title {
+  letter-spacing: -0.03em;
+}
+
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .animate-fade-in {
-  animation: fade-in 200ms ease-out;
+  animation: fade-in 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes toast-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .animate-toast-in {
-  animation: toast-in 180ms ease-out;
+  animation: toast-in 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes glass-shine {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes nav-pop {
+  from {
+    transform: scale(0.96);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.nav-active-pill {
+  animation: nav-pop 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }

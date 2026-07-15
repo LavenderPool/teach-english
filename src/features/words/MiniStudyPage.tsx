@@ -84,8 +84,8 @@ export function MiniStudyPage() {
       : null
 
   return (
-    <div className="flex h-screen flex-col bg-background text-foreground">
-      <header className="flex items-center justify-between border-b border-border/60 px-4 py-3">
+    <div className="flex h-screen flex-col bg-transparent text-foreground">
+      <header className="m-3 mb-0 flex items-center justify-between rounded-3xl glass-nav px-4 py-3">
         <div>
           <div className="text-sm font-semibold tracking-tight">English Learner</div>
           <div className="text-[11px] text-muted-foreground">Мини-режим · слова</div>
@@ -115,7 +115,7 @@ export function MiniStudyPage() {
         ) : (
           <>
             <div className="text-xs text-muted-foreground">Осталось: {queue.length}</div>
-            <div className="w-full max-w-sm space-y-4 rounded-2xl border border-border/70 bg-card px-5 py-10 text-center shadow-sm">
+            <div className="glass-strong w-full max-w-sm space-y-4 rounded-[1.75rem] px-5 py-10 text-center">
               {current.category && <Badge>{current.category}</Badge>}
               <div className="text-3xl font-semibold tracking-tight">{current.word}</div>
               {current.transcription && (

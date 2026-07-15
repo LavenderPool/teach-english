@@ -9,11 +9,11 @@ export function Toaster() {
           key={t.id}
           type="button"
           onClick={() => dismiss(t.id)}
-          className={`pointer-events-auto animate-toast-in rounded-2xl border border-border bg-card p-4 text-left shadow-lg transition-opacity ${
+          className={`glass-strong pointer-events-auto animate-toast-in rounded-3xl p-4 text-left transition-opacity ${
             t.kind === 'error'
-              ? 'border-danger/30'
+              ? 'border-danger/35'
               : t.kind === 'success'
-                ? 'border-success/30'
+                ? 'border-success/35'
                 : ''
           }`}
         >

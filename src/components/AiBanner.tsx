@@ -7,7 +7,7 @@ export function AiBanner() {
   if (apiKey.trim()) return null
 
   return (
-    <div className="mb-5 flex items-start gap-3 rounded-2xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm">
+    <div className="mb-5 flex items-start gap-3 rounded-3xl border border-warning/25 bg-warning/12 px-4 py-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] backdrop-blur-xl">
       <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
       <div>
         <div className="font-medium">ИИ-функции недоступны</div>
