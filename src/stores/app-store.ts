@@ -146,10 +146,24 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   reviewCard: (id, quality) => {
     const { settings } = get()
-    set((s) =>
-      persist({
+    set((s) => {
+      let nextSettings = updateStreak(s.settings)
+      if (nextSettings.wordAlarmEnabled && nextSettings.wordAlarmPendingUnlock) {
+        const progress = nextSettings.wordAlarmCardsProgress + 1
+        if (progress >= nextSettings.wordAlarmCardsRequired) {
+          nextSettings = {
+            ...nextSettings,
+            wordAlarmPendingUnlock: false,
+            wordAlarmCardsProgress: 0,
+            wordAlarmNextAt: Date.now() + nextSettings.wordAlarmIntervalHours * 60 * 60 * 1000,
+          }
+        } else {
+          nextSettings = { ...nextSettings, wordAlarmCardsProgress: progress }
+        }
+      }
+      return persist({
         ...s,
-        settings: updateStreak(s.settings),
+        settings: nextSettings,
         cards: s.cards.map((c) =>
           c.id === id
             ? applyReview(c, quality, {
@@ -159,8 +173,8 @@ export const useAppStore = create<AppState>((set, get) => ({
               })
             : c,
         ),
-      }),
-    )
+      })
+    })
   },
 
   importSeedDictionary: async () => {
