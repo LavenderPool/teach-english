@@ -81,6 +81,18 @@ export interface AppSettings {
   arcadeTimerSec: number
   streakDays: number
   lastStudyDate: string | null
+  /** macOS: word reminder alarm */
+  wordAlarmEnabled: boolean
+  /** Fire every N hours */
+  wordAlarmIntervalHours: number
+  /** Cards to complete after an alarm before it arms again */
+  wordAlarmCardsRequired: number
+  /** Timestamp of next fire; null while waiting for unlock cards */
+  wordAlarmNextAt: number | null
+  /** After alarm fired — waiting for card completions */
+  wordAlarmPendingUnlock: boolean
+  wordAlarmCardsProgress: number
+  wordAlarmLastWordId: string | null
 }
 
 export interface AppDatabase {
@@ -108,6 +120,13 @@ export const DEFAULT_SETTINGS: AppSettings = {
   arcadeTimerSec: 0,
   streakDays: 0,
   lastStudyDate: null,
+  wordAlarmEnabled: false,
+  wordAlarmIntervalHours: 3,
+  wordAlarmCardsRequired: 5,
+  wordAlarmNextAt: null,
+  wordAlarmPendingUnlock: false,
+  wordAlarmCardsProgress: 0,
+  wordAlarmLastWordId: null,
 }
 
 export const DB_VERSION = 1

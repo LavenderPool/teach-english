@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import {
   AudioLines,
-  BookOpen,
   Clock3,
   Layers3,
   PenLine,
@@ -62,11 +61,6 @@ export function Sidebar() {
         <Settings className="h-4 w-4" />
         Настройки
       </NavLink>
-
-      <div className="mt-4 flex items-center gap-2 px-2 text-[11px] text-muted-foreground">
-        <BookOpen className="h-3.5 w-3.5" />
-        Учитесь каждый день
-      </div>
     </aside>
   )
 }
