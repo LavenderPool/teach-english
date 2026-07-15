@@ -26,8 +26,8 @@ export function TranscriptionPage() {
   return (
     <div className="animate-fade-in space-y-6">
       <header>
-        <h1 className="text-3xl font-semibold tracking-tight">Транскрипция</h1>
-        <p className="mt-1 text-muted-foreground">
+        <h1 className="page-title text-[2.2rem] leading-none">Транскрипция</h1>
+        <p className="mt-2 text-[14px] text-muted-foreground">
           IPA-символы и практика произношения с виртуальной клавиатурой.
         </p>
       </header>
@@ -100,7 +100,7 @@ function IpaTheory() {
                     <button
                       key={ex.word}
                       type="button"
-                      className="flex w-full items-center justify-between rounded-xl bg-muted/50 px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
+                      className="flex w-full items-center justify-between rounded-xl bg-muted/80 px-3 py-2 text-left text-[13px] transition-colors hover:bg-muted"
                       onClick={() => speak(ex.word, { voiceURI: voice, rate })}
                     >
                       <span>
@@ -303,12 +303,12 @@ function IpaKeyboard({
   onBackspace: () => void
 }) {
   return (
-    <div className="flex flex-wrap gap-1.5 rounded-2xl bg-muted/40 p-3">
+    <div className="flex flex-wrap gap-1.5 rounded-2xl bg-muted/70 p-3">
       {IPA_KEYBOARD.map((s) => (
         <button
           key={s}
           type="button"
-          className="min-w-9 rounded-lg bg-card px-2 py-1.5 font-mono text-sm shadow-sm transition-colors hover:bg-accent-soft"
+          className="min-w-9 rounded-lg bg-card px-2 py-1.5 font-mono text-[13px] transition-colors hover:bg-accent-soft"
           onClick={() => onInsert(s)}
         >
           {s}
@@ -316,7 +316,7 @@ function IpaKeyboard({
       ))}
       <button
         type="button"
-        className="rounded-lg bg-card px-3 py-1.5 text-sm shadow-sm hover:bg-muted"
+        className="rounded-lg bg-card px-3 py-1.5 text-[13px] hover:bg-muted"
         onClick={onBackspace}
       >
         ⌫

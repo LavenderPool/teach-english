@@ -84,11 +84,13 @@ export function MiniStudyPage() {
       : null
 
   return (
-    <div className="flex h-screen flex-col bg-background text-foreground">
-      <header className="flex items-center justify-between border-b border-border/60 px-4 py-3">
+    <div className="flex h-screen flex-col bg-transparent text-foreground">
+      <header className="m-3 mb-0 flex items-center justify-between rounded-2xl glass-nav px-4 py-3">
         <div>
-          <div className="text-sm font-semibold tracking-tight">English Learner</div>
-          <div className="text-[11px] text-muted-foreground">Мини-режим · слова</div>
+          <div className="font-display text-[1.1rem] font-semibold tracking-tight">English</div>
+          <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            Мини · слова
+          </div>
         </div>
         <Button size="sm" variant="secondary" onClick={() => void openMainWindow('/words')}>
           <ExternalLink className="h-3.5 w-3.5" />
@@ -115,9 +117,9 @@ export function MiniStudyPage() {
         ) : (
           <>
             <div className="text-xs text-muted-foreground">Осталось: {queue.length}</div>
-            <div className="w-full max-w-sm space-y-4 rounded-2xl border border-border/70 bg-card px-5 py-10 text-center shadow-sm">
+            <div className="glass-strong w-full max-w-sm space-y-4 rounded-2xl px-5 py-10 text-center">
               {current.category && <Badge>{current.category}</Badge>}
-              <div className="text-3xl font-semibold tracking-tight">{current.word}</div>
+              <div className="font-display text-[2rem] font-semibold tracking-tight">{current.word}</div>
               {current.transcription && (
                 <div className="font-mono text-sm text-muted-foreground">{current.transcription}</div>
               )}
